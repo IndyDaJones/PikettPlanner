@@ -77,15 +77,15 @@ public class Plan {
 		for (int cust = 0; cust < customers.size(); cust++) {
 			int empl = 0;
 			for (int week = 1; week <= weeks.size(); week++) {
-				Hashtable employees = db.GetEmployeeFromCustomer(customers.get(cust).toString(), Integer.toString(week));
+				Hashtable employees = db.GetEmployeeFromCustomer(customers.get(cust).toString(), week);
 				empl = 0;
 				if (employees.isEmpty()) {
 					db.planWeek(customers.get(cust).toString(), Integer.toString(week));
 				}else {
 					log.log(Level.INFO,"Employee fetched: <"+employees.size()+">");
-					String weekToPlan = String.format("%02d", week);
+					String weekToPlan =  String.format("%02d", week);
 					log.log(Level.INFO,"New week: Customer: <" + customers.get(cust).toString() + ">, Employee: <"+employees.get(empl).toString()+">, Week: <"+weekToPlan+">");
-					db.planWeek(customers.get(cust).toString(), employees.get(empl).toString(), weekToPlan);
+					db.planWeek(customers.get(cust).toString(), employees.get(empl).toString(), week);
 					empl++;
 				}
 			}

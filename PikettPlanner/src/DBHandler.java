@@ -373,16 +373,18 @@ public class DBHandler {
 	/**
 	 * Returns the defined foldernames to the files
 	 */
-	public Hashtable GetEmployeeFromCustomer(String customer, String week) {
+	public Hashtable GetEmployeeFromCustomer(String customer, int week) {
 		//Statement s;
 		int i = 0;
 		ResultSet rs = null;
 		Hashtable result = new Hashtable();
+		String weekAfterHoliday = String.format("%02d", week+1);
+		String weekToPlan =  String.format("%02d", week);
 		try {
 			Statement s = conn.createStatement();
 		    log.log(Level.INFO,"Statement established");
 		    // Fetch table
-		    String selection = "SELECT mapp.employee FROM  "+ getMappingTableName() +" mapp WHERE  mapp.customer = '"+customer+"' and mapp.employee not IN (select hol.employee from v_whd_holiday hol where hol.WEEK = '"+week+"') order by (select count(*) from v_whd_planning where customer = '"+customer+"' and employee = mapp.employee) asc, (select count(*) from v_whd_planning where week = '"+week+"' and employee = mapp.employee) desc";
+		    String selection = "SELECT mapp.employee FROM  "+ getMappingTableName() +" mapp WHERE  mapp.customer = '"+customer+"' and mapp.employee NOT IN (select hol.employee from v_whd_holiday hol where hol.WEEK IN ('"+weekToPlan+"', '"+weekAfterHoliday+"')) order by (select count(*) from v_whd_prefer where customer = '"+customer+"' and employee = mapp.employee and WEEK = '"+week+"') desc, (select count(*) from v_whd_planning where customer = '"+customer+"' and employee = mapp.employee) asc, (select count(*) from v_whd_planning where week = '"+weekToPlan+"' and employee = mapp.employee) desc";
 		    log.log(Level.INFO,"Query to execute: " + selection);
 		    s.execute(selection);
 		    rs = s.getResultSet();
@@ -442,12 +444,13 @@ public class DBHandler {
 	 * @param ID Idetifier from the record
 	 * @param checksum calculated checksum
 	 */
-	public void planWeek(String customer, String employee, String week){
+	public void planWeek(String customer, String employee, int week){
 	try {
 		Statement s = conn.createStatement();
 	    log.log(Level.INFO,"Statement established");
 	    // Fetch table
-	    String query = "INSERT INTO "+getPlanningTableName()+" (CUSTOMER, EMPLOYEE, WEEK) VALUES('"+customer+"','"+employee+"','"+week+"')";
+	    String weekToPlan =  String.format("%02d", week);
+	    String query = "INSERT INTO "+getPlanningTableName()+" (CUSTOMER, EMPLOYEE, WEEK) VALUES('"+customer+"','"+employee+"','"+weekToPlan+"')";
 	    log.log(Level.INFO,"Query to execute: " + query);
 	    s.execute(query);
 	    ResultSet rs = s.getResultSet();
